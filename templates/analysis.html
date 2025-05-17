@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Analysis</title>
+  <style>
+    body { margin:0; font-family:Arial,sans-serif; }
+    header { display:flex; gap:10px; padding:10px; background:#f0f0f0; align-items:center; }
+    button { padding:8px 12px; font-size:1em; }
+    iframe { width:100%; height:calc(100vh - 60px); border:none; }
+  </style>
+</head>
+<body>
+  <header>
+    <button id="toggleMove">
+      Move: {{ 'Black' if move=='b' else 'White' }}
+    </button>
+    <button id="rotateBoard">
+      Rotate
+    </button>
+    <button id="flipFen">
+      Flip
+    </button>
+    <button onclick="window.location='/'">
+      Retake
+    </button>
+  </header>
+
+  <iframe id="analysisFrame"
+          src="https://lichess.org/analysis/fromPosition/{{ fen }}_{{ move }}_-_-_0_1?color={{ orientation }}">
+  </iframe>
+
+  <script>
+    // Initial values from server
+    const originalFen   = "{{ fen }}";
+    const reversedFen   = originalFen.split('').reverse().join('');
+    let fen             = originalFen;
+    let move            = "{{ move }}";         // 'b' or 'w'
+    let orientation     = "{{ orientation }}";  // 'white' or 'black'
+
+    function updateIframe(){
+      const fenSuffix = `${fen}_${move}_-_-_0_1`;
+      const url = `https://lichess.org/analysis/fromPosition/${fenSuffix}?color=${orientation}`;
+      document.getElementById('analysisFrame').src = url;
+      document.getElementById('toggleMove').textContent    = "Move: " + (move==='b'?'Black':'White');
+      document.getElementById('rotateBoard').textContent  = "Orientation: " + orientation;
+    }
+
+    // Toggle which side to move
+    document.getElementById('toggleMove').onclick = () => {
+      move = (move==='b'?'w':'b');
+      updateIframe();
+    };
+
+    // Toggle board orientation
+    document.getElementById('rotateBoard').onclick = () => {
+      orientation = (orientation==='white'?'black':'white');
+      updateIframe();
+    };
+
+    // Flip FEN (reverse ranks)
+    document.getElementById('flipFen').onclick = () => {
+      fen = (fen === originalFen ? reversedFen : originalFen);
+      updateIframe();
+    };
+  </script>
+</body>
+</html>

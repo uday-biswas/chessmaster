@@ -3,6 +3,7 @@ import numpy as np
 from io import BytesIO
 import requests
 from flask import Flask, request, send_file, render_template, redirect, url_for
+import os
 
 app = Flask(__name__)
 
@@ -147,4 +148,6 @@ def analysis():
 
 
 if __name__ == '__main__':
-    app.run()
+    port = int(os.environ.get("PORT", 5000))
+    # listen on all interfaces so Railway / Docker / Vercel can route traffic
+    app.run(host="0.0.0.0", port=port)

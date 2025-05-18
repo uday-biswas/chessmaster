@@ -132,7 +132,9 @@ def process():
     f = request.files['image']
     arr = np.frombuffer(f.read(), np.uint8)
     img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
-    fen, _ = filter_real_pieces_with_inpainting(img)
+    fen, filtered_image = filter_real_pieces_with_inpainting(img)
+    save_path = os.path.join(app.static_folder, 'processed_image.png')
+    cv2.imwrite(save_path, filtered_image)
     # default move = black, default orientation = white
     return redirect(url_for('analysis', fen=fen, move='b', orientation='white'))
 

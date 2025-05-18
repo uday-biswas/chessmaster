@@ -25,6 +25,12 @@
     <button onclick="window.location='/'">
       Retake
     </button>
+    <button id="downloadImage">
+      Download
+    </button>
+    <button id="openNewTab">
+      Open
+    </button>
   </header>
 
   <iframe id="analysisFrame"
@@ -38,13 +44,17 @@
     let fen             = originalFen;
     let move            = "{{ move }}";         // 'b' or 'w'
     let orientation     = "{{ orientation }}";  // 'white' or 'black'
+    const imageURL      = "{{ url_for('static', filename='processed_image.png') }}";
+
+    function currentLichessUrl() {
+      const fenSuffix = `${fen}_${move}_-_-_0_1`;
+      return `https://lichess.org/analysis/fromPosition/${fenSuffix}?color=${orientation}`;
+    }
 
     function updateIframe(){
-      const fenSuffix = `${fen}_${move}_-_-_0_1`;
-      const url = `https://lichess.org/analysis/fromPosition/${fenSuffix}?color=${orientation}`;
-      document.getElementById('analysisFrame').src = url;
+      document.getElementById('analysisFrame').src = currentLichessUrl();
       document.getElementById('toggleMove').textContent    = "Move: " + (move==='b'?'Black':'White');
-      document.getElementById('rotateBoard').textContent  = "Orientation: " + orientation;
+      document.getElementById('rotateBoard').textContent   = "rotate";
     }
 
     // Toggle which side to move
@@ -64,6 +74,22 @@
       fen = (fen === originalFen ? reversedFen : originalFen);
       updateIframe();
     };
+
+    // Open current analysis URL in a new tab
+    document.getElementById('openNewTab').onclick = () => {
+      window.open(currentLichessUrl(), '_blank');
+    };
+
+    // Download the processed board image
+    document.getElementById('downloadImage').onclick = () => {
+      const a = document.createElement('a');
+      a.href = imageURL;
+      a.download = 'processed_board.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    };
+
   </script>
 </body>
 </html>

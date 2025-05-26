@@ -85,10 +85,17 @@ def filter_real_pieces_with_inpainting(image):
             crop_size = int(square_size_x * 0.2)
             square = filtered_image[y_start + crop_size:y_start + square_size_y - crop_size,
                                     x_start + crop_size:x_start + square_size_x - crop_size]
+            
+            # to show the square image 
+            cv2.imshow("Square", square)
 
             gray_square = cv2.cvtColor(square, cv2.COLOR_BGR2GRAY)
             # edges = cv2.Canny(gray_square, threshold1=100, threshold2=200)
             variance = np.var(gray_square)
+            print(f"Variance for square ({row}, {col}): {variance}")
+            #printing new line
+            print("\n")
+            
 
             if variance < 200:
                 surrounding_color = np.mean(filtered_image[y_start:y_start + square_size_y,
@@ -133,8 +140,10 @@ def process():
     arr = np.frombuffer(f.read(), np.uint8)
     img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
     fen, filtered_image = filter_real_pieces_with_inpainting(img)
-    save_path = os.path.join(app.static_folder, 'processed_image.png')
-    cv2.imwrite(save_path, filtered_image)
+    processed_save_path = os.path.join(app.static_folder, 'processed_image.png')
+    real_save_path = os.path.join(app.static_folder, 'real_image.png')
+    cv2.imwrite(real_save_path, img)
+    cv2.imwrite(processed_save_path, filtered_image)
     # default move = black, default orientation = white
     return redirect(url_for('analysis', fen=fen, move='b', orientation='white'))
 

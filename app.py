@@ -85,16 +85,13 @@ def filter_real_pieces_with_inpainting(image):
             crop_size = int(square_size_x * 0.2)
             square = filtered_image[y_start + crop_size:y_start + square_size_y - crop_size,
                                     x_start + crop_size:x_start + square_size_x - crop_size]
-            
-            # to show the square image 
-            cv2.imshow("Square", square)
 
             gray_square = cv2.cvtColor(square, cv2.COLOR_BGR2GRAY)
             # edges = cv2.Canny(gray_square, threshold1=100, threshold2=200)
             variance = np.var(gray_square)
-            print(f"Variance for square ({row}, {col}): {variance}")
+            # print(f"Variance for square ({row}, {col}): {variance}")
             #printing new line
-            print("\n")
+            # print("\n")
             
 
             if variance < 200:
@@ -106,27 +103,8 @@ def filter_real_pieces_with_inpainting(image):
                 filtered_image[y_start :y_start + square_size_y,
                                x_start :x_start + square_size_x ] = surrounding_color
     
-    # Convert the image (from NumPy array to file-like object) to pass to the API
-    _, img_encoded_n = cv2.imencode('.jpg', filtered_image)
-    img_bytes_n = img_encoded_n.tobytes()
     
-    # Prepare the image for the API request
-    files = {"file": ("chessboard.jpg", img_bytes_n, "image/jpg")}
-    response = requests.post(api_url, files=files)
-
-    if response.status_code != 200:
-        print("Error: API call failed with status code", response.status_code)
-        print("Response content:", response.content)  # Print response content
-        exit(1)
-
-    data = response.json()
-    if "results" not in data or not data["results"]:
-        print("Error: No results from API")
-        exit(1)
-
-    # Extract xc, yc, width, height from the first result in the API response
-    result = data["results"][0]
-    return result["fen"], filtered_image
+    return filtered_image
 
 
 @app.route('/')
@@ -139,11 +117,21 @@ def process():
     f = request.files['image']
     arr = np.frombuffer(f.read(), np.uint8)
     img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
-    fen, filtered_image = filter_real_pieces_with_inpainting(img)
+    filtered_image = filter_real_pieces_with_inpainting(img)
     processed_save_path = os.path.join(app.static_folder, 'processed_image.png')
     real_save_path = os.path.join(app.static_folder, 'real_image.png')
     cv2.imwrite(real_save_path, img)
     cv2.imwrite(processed_save_path, filtered_image)
+
+    url = "https://helpman.komtera.lt/chessocr/predict"
+
+    with open(processed_save_path, "rb") as image_file:
+        files = {"file": ("image.jpg", image_file, "image/jpeg")}
+        response = requests.post(url, files=files)
+        data = response.json()
+   
+    fen = data["results"][0]["fen"]
+    print(f"FEN: {fen}")
     # default move = black, default orientation = white
     return redirect(url_for('analysis', fen=fen, move='b', orientation='white'))
 

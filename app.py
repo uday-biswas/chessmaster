@@ -94,7 +94,7 @@ def filter_real_pieces_with_inpainting(image):
             # print("\n")
             
 
-            if variance < 200:
+            if variance < 300:
                 surrounding_color = np.mean(filtered_image[y_start:y_start + square_size_y,
                                                            x_start:x_start + square_size_x], axis=(0, 1))
                 surrounding_color = tuple(int(c) for c in surrounding_color)
@@ -118,15 +118,15 @@ def process():
     arr = np.frombuffer(f.read(), np.uint8)
     img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
     filtered_image = filter_real_pieces_with_inpainting(img)
-    processed_save_path = os.path.join(app.static_folder, 'processed_image.png')
-    real_save_path = os.path.join(app.static_folder, 'real_image.png')
+    processed_save_path = os.path.join(app.static_folder, 'processed_image.jpg')
+    real_save_path = os.path.join(app.static_folder, 'real_image.jpg')
     cv2.imwrite(real_save_path, img)
     cv2.imwrite(processed_save_path, filtered_image)
 
     url = "https://helpman.komtera.lt/chessocr/predict"
 
     with open(processed_save_path, "rb") as image_file:
-        files = {"file": ("image.png", image_file, "image/png")}
+        files = {"file": ("image.jpg", image_file, "image/jpg")}
         response = requests.post(url, files=files)
         data = response.json()
    

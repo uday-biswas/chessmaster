@@ -126,7 +126,7 @@ def process():
     url = "https://helpman.komtera.lt/chessocr/predict"
 
     with open(processed_save_path, "rb") as image_file:
-        files = {"file": ("image.jpg", image_file, "image/jpeg")}
+        files = {"file": ("image.png", image_file, "image/png")}
         response = requests.post(url, files=files)
         data = response.json()
    

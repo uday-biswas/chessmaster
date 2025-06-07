@@ -34,7 +34,7 @@
   </header>
 
   <iframe id="analysisFrame"
-          src="https://lichess.org/analysis/fromPosition/{{ fen }}_{{ move }}_-_-_0_1?color={{ orientation }}">
+          src="https://lichess.org/embed/analysis/?fen={{ fen }}_{{ move }}_-_-_0_1&color={{ orientation }}">
   </iframe>
 
   <script>
@@ -48,13 +48,13 @@
 
     function currentLichessUrl() {
       const fenSuffix = `${fen}_${move}_-_-_0_1`;
-      return `https://lichess.org/analysis/fromPosition/${fenSuffix}?color=${orientation}`;
+      return `https://lichess.org/embed/analysis/?fen=${fenSuffix}&color=${orientation}`;
     }
 
     function updateIframe(){
       document.getElementById('analysisFrame').src = currentLichessUrl();
       document.getElementById('toggleMove').textContent    = "Move: " + (move==='b'?'Black':'White');
-      document.getElementById('rotateBoard').textContent   = "rotate";
+      document.getElementById('rotateBoard').textContent   = "Rotate";
     }
 
     // Toggle which side to move
